@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RGB-D 視覺感知｜從目標追蹤到定位與抓取</title>
+<style>
+:root{color-scheme:dark;--bg:#101929;--ink:#f4f7ff;--muted:#b9c9db;--accent:#86efcf}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:clamp(16px,2.25vw,28px)/1.45 system-ui,sans-serif}
+main{width:min(1120px,100%);margin:auto;padding:clamp(20px,5vw,75px);min-height:85vh}
+h1,h2{font-size:clamp(32px,6vw,76px);line-height:1.1;letter-spacing:-.04em;margin:0 0 .45em}
+h3{margin:0 0 .4em} p{max-width:34em} a{color:var(--accent)}
+.kicker{color:var(--accent);font-size:.7em;letter-spacing:.12em}
+.panels{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,235px),1fr));gap:16px;margin:1em 0}
+.card{background:#19283e;border:1px solid #425775;border-radius:14px;padding:20px}
+.cite{font-size:.7em;color:var(--muted);margin-top:2em}
+nav{display:flex;justify-content:center;align-items:center;gap:16px;padding:20px;font-size:16px}
+button{font:inherit;color:var(--ink);background:#223752;border:1px solid #6783a8;border-radius:8px;padding:9px 14px;cursor:pointer}
+button:disabled{opacity:.45;cursor:default}
+button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid var(--accent)}
+details{background:#19283e;padding:14px 20px;border-radius:12px} summary{cursor:pointer}
+@media print{body{background:white;color:#101929;font-size:16pt}main{padding:0}section[hidden],section{display:block!important;break-after:page}nav{display:none}h1,h2,.kicker,.cite,a{color:#101929}.card,details{background:white}}
+</style>
+</head>
+<body>
+<main>
+<section id="s1">
+<p class="kicker">RGB-D 視覺感知</p>
+<h1>從目標追蹤<br>到定位與抓取</h1>
+<p>想像兩個顏色相近的杯子。如果相機還知道它們各離自己多遠，這個資訊可以拿來做什麼？</p>
+<p>看完你會分辨四種問題：物體在哪裡、相機走過哪裡、物體怎麼擺、夾爪該怎麼抓。</p>
+<p class="cite"><a href="wiki/index.md">LLM Wiki · 六篇來源</a></p>
+</section>
+<section id="s2">
+<p class="kicker">感測輸入</p><h2>同一個畫面，兩種線索</h2>
+<div class="panels"><div class="card"><h3>RGB</h3>記錄外觀。兩個杯子都可能是藍色。</div><div class="card"><h3>深度</h3>描述表面和相機之間的距離。前方的杯子可能比較近。</div></div>
+<p>線索可互補。例如，顏色接近時，距離差可能讓物體更容易區分。</p>
+<p class="cite"><a href="wiki/concepts/signals.md">Wiki · 色彩、深度與位置估計</a> · <a href="wiki/papers/tabbtrack.md">TABBTrack §1</a></p>
+</section>
+<section id="s3">
+<p class="kicker">主案例 · TABBTrack</p><h2>追蹤的是同一個物體</h2>
+<p>先在第一幀框出杯子。後續每一幀都在新的畫面裡找它。</p>
+<div class="panels"><div class="card"><h3>融合</h3>用橋接模板讓色彩與深度特徵交換資訊。</div><div class="card"><h3>更新</h3>保留首幀模板，另用符合條件的後續影格更新線上模板，以應對外觀變化。</div></div>
+<p class="cite"><a href="wiki/concepts/fusion-and-update.md">Wiki · 融合與更新</a> · <a href="wiki/papers/tabbtrack.md">TABBTrack Fig. 3，PDF 第 4–5 頁</a></p>
+</section>
+<section id="s4">
+<p class="kicker">相機定位與重建</p><h2>相機去了哪裡？</h2>
+<p>SLAM 同時估計相機運動並建立場景地圖。例如，繞桌一圈回到起點時，系統要把現在和先前看到的位置對齊。</p>
+<div class="panels"><div class="card"><h3>2DGS-SLAM</h3>用回環偵測和地圖更新，處理重訪區域的一致性。</div><div class="card"><h3>PG-SLAM</h3>同時考慮會動的前景和相對靜止的背景，用於定位與重建。</div></div>
+<p class="cite"><a href="wiki/concepts/mapping.md">Wiki · 相機定位與場景重建</a> · <a href="wiki/papers/2dgs.md">2DGS-SLAM</a> · <a href="wiki/papers/pg.md">PG-SLAM</a></p>
+</section>
+<section id="s5">
+<p class="kicker">姿態估測與抓取</p><h2>物體怎麼擺？夾爪怎麼抓？</h2>
+<p>六自由度描述三個平移方向和三個旋轉方向。先辨認是誰的姿態。</p>
+<div class="panels"><div class="card"><h3>物體姿態</h3>Liu 等估計物體的位置與方向，再用這些資訊輔助實際抓取。</div><div class="card"><h3>夾爪姿態</h3>PSAGrasp 從點雲預測夾爪可以放在哪裡、朝向哪裡。</div></div>
+<p class="cite"><a href="wiki/concepts/grasp.md">Wiki · 物體姿態與夾爪姿態</a> · <a href="wiki/papers/pose.md">Liu 等 §5</a> · <a href="wiki/papers/psa.md">PSAGrasp §5</a></p>
+</section>
+<section id="s6">
+<p class="kicker">輸入方式的對照</p><h2>只有一台相機，怎麼估距？</h2>
+<p>取物輔具從單相機影像辨識手和物品，估算距離，並用 Kalman 濾波預測手的短期位置，以語音輔助取物。</p>
+<p>比較系統時，先問距離是感測器提供的，還是系統從影像估算的。</p>
+<p class="cite"><a href="wiki/concepts/signals.md">Wiki · 色彩、深度與位置估計</a> · <a href="wiki/papers/assist.md">Barsalani 等摘要、§4</a></p>
+</section>
+<section id="s7">
+<p class="kicker">讀懂研究證據</p><h2>看到分數，先找原表</h2>
+<p>TABBTrack 的 DepthTrack F-score 在方法比較表為 <strong>0.618</strong>，在元件消融表為 <strong>0.619</strong>。Wiki 併列兩個原值與表號，差異原因待釐清。</p>
+<p>比較前，記下資料集、指標和實驗脈絡。追蹤分數、軌跡誤差和實際抓取成功率回答的是不同問題。</p>
+<p class="cite"><a href="wiki/papers/tabbtrack.md">Wiki · TABBTrack Tables 1、3</a> · <a href="wiki/source-scope.md">任務比較</a></p>
+</section>
+<section id="s8">
+<p class="kicker">自我檢查</p><h2>你需要估計的是什麼？</h2>
+<p>同一個桌面場景中，試著說出三個輸出：紅杯在下一幀的位置、相機繞桌的路徑、夾爪抓杯的位置與方向。</p>
+<details><summary>查看答案</summary><p>依序是單目標追蹤、SLAM 中的相機定位、抓取姿態偵測。</p></details>
+<p class="cite"><a href="wiki/index.md">瀏覽完整 Wiki</a> · <a href="wiki/source-scope.md">回顧任務比較</a></p>
+</section>
+</main>
+<nav aria-label="投影片導覽"><button id="prev" type="button">上一頁</button><span id="count" aria-live="polite"></span><button id="next" type="button">下一頁</button></nav>
+<script>
+const slides = [...document.querySelectorAll('main section')];
+const previous = document.querySelector('#prev');
+const next = document.querySelector('#next');
+const count = document.querySelector('#count');
+let current = 0;
+function render() {
+  const fromHash = slides.findIndex(slide => '#' + slide.id === location.hash);
+  current = Math.max(0, fromHash);
+  slides.forEach((slide, index) => { slide.hidden = index !== current; });
+  count.textContent = (current + 1) + ' / ' + slides.length;
+  previous.disabled = current === 0;
+  next.disabled = current === slides.length - 1;
+  window.scrollTo(0, 0);
+}
+function move(delta) {
+  const target = slides[current + delta];
+  if (target) location.hash = target.id;
+}
+previous.addEventListener('click', () => move(-1));
+next.addEventListener('click', () => move(1));
+window.addEventListener('hashchange', render);
+window.addEventListener('keydown', event => {
+  if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+  if (event.key === 'ArrowRight') move(1);
+  if (event.key === 'ArrowLeft') move(-1);
+});
+render();
+</script>
+</body>
+</html>
